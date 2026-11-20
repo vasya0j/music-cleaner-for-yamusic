@@ -128,88 +128,134 @@
   const normalizeText = (text) =>
     (text || "").replace(/\s+/g, " ").trim().toLowerCase();
 
-  const isBackToUsual = (slide) =>
-    normalizeText(slide.textContent).includes("назад к привычному");
+  const isBackToUsual = (element) =>
+    normalizeText(element?.textContent).includes("назад к привычному");
 
-  function cleanVibeWheel() {
-    let waveActive = false;
+  const WHEEL_SELECTOR =
+    '[data-test-id="WHEEL_DESKTOP"], [data-test-id="WHEEL_MOBILE"]';
 
-    $all(
-      '[data-test-id="WHEEL_DESKTOP"], [data-test-id="WHEEL_MOBILE"]'
-    ).forEach((wheel) => {
-      const slides = $all(
-        '[data-test-id="WHEEL_DESKTOP_SLIDE"], [data-test-id="WHEEL_MOBILE_SLIDE"]',
-        wheel
-      );
+  /*
+   * Колесо Swiper не перестраиваем: оно лежит в панели с фиксированной
+   * высотой, и любые изменения его разметки/размеров ломают раскладку всей
+   * страницы. Вместо этого оставляем оригинальные кнопки в DOM (они скрыты
+   * стилями), а поверх колеса показываем свою панель. Нажатие на нашу кнопку
+   * пробрасывается в настоящую кнопку, поэтому обработчики React работают.
+   */
+  function findWheelControls(wheel) {
+    const setting = wheel.querySelector(
+      '[data-test-id="WHEEL_SETTING_ITEM"]'
+    );
+    const reshuffles = $all(
+      '[data-test-id="WHEEL_RESHUFFLE_ITEM"]',
+      wheel
+    );
+    const reshuffle =
+      reshuffles.find(isBackToUsual) || reshuffles[0] || null;
 
-      if (!slides.length) {
-        return;
-      }
+    return { setting, reshuffle };
+  }
 
-      const hasControls = slides.some(
-        (slide) =>
-          slide.querySelector('[data-test-id="WHEEL_SETTING_ITEM"]') ||
-          slide.querySelector('[data-test-id="WHEEL_RESHUFFLE_ITEM"]')
-      );
+  /* Не даём Swiper перехватывать колесо мыши: страница должна скроллиться
+     как обычно. preventDefault не вызываем, поэтому прокрутка сохраняется. */
+  function disableWheelHijack(wheel) {
+    /* Если у Swiper есть доступный экземпляр, выключаем модуль mousewheel. */
+    const instance = wheel.swiper || wheel.__swiper__;
+    instance?.mousewheel?.disable?.();
 
-      if (!hasControls) {
-        return;
-      }
+    if (wheel.dataset.yfmWheelGuard) {
+      return;
+    }
 
-      waveActive = true;
-      document.documentElement.classList.add("yfm-wave");
+    wheel.dataset.yfmWheelGuard = "1";
+    wheel.addEventListener(
+      "wheel",
+      (event) => event.stopImmediatePropagation(),
+      { capture: true, passive: true }
+    );
+  }
 
-      const hasBackToUsual = slides.some(
-        (slide) =>
-          slide.querySelector('[data-test-id="WHEEL_RESHUFFLE_ITEM"]') &&
-          isBackToUsual(slide)
-      );
+  function createActionButton(label, original) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
 
-      let settingKept = false;
-      let backKept = false;
-      let reshuffleKept = false;
-
-      slides.forEach((slide) => {
-        const setting = slide.querySelector(
-          '[data-test-id="WHEEL_SETTING_ITEM"]'
-        );
-        const reshuffle = slide.querySelector(
-          '[data-test-id="WHEEL_RESHUFFLE_ITEM"]'
-        );
-
-        let keep = false;
-
-        if (setting) {
-          if (!settingKept) {
-            keep = true;
-            settingKept = true;
-          }
-        } else if (reshuffle) {
-          if (hasBackToUsual) {
-            if (isBackToUsual(slide) && !backKept) {
-              keep = true;
-              backKept = true;
-            }
-          } else if (!reshuffleKept) {
-            keep = true;
-            reshuffleKept = true;
-          }
-        }
-
-        slide.classList.toggle("yfm-wheel-keep", keep);
-        slide.classList.toggle("yfm-wheel-hidden", !keep);
-        if (!keep) {
-          slide.classList.remove("yfm-wheel-keep");
-        }
-      });
-
-      wheel.classList.add("yfm-wheel-cleaned");
-      wheel.parentElement?.classList.add("yfm-wheel-parent");
+    /* Swiper слушает нажатия на своём корне; не даём ему принять нажатие
+       по нашей кнопке за начало свайпа. */
+    ["pointerdown", "mousedown", "touchstart"].forEach((type) => {
+      button.addEventListener(type, (event) => event.stopPropagation());
     });
 
-    if (!waveActive) {
-      document.documentElement.classList.remove("yfm-wave");
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      original.click();
+    });
+    return button;
+  }
+
+  function labelOf(element) {
+    return (
+      element.getAttribute("aria-label") ||
+      element.textContent ||
+      ""
+    ).trim();
+  }
+
+  function renderWheelActions(wheel, controls) {
+    let panel = wheel.querySelector(".yfm-wave-actions");
+
+    if (
+      panel &&
+      panel.yfmSetting === controls.setting &&
+      panel.yfmReshuffle === controls.reshuffle
+    ) {
+      return;
     }
+
+    panel?.remove();
+
+    panel = document.createElement("div");
+    panel.className = "yfm-wave-actions";
+    panel.setAttribute("data-yfm-injected", "1");
+
+    if (controls.setting) {
+      panel.append(
+        createActionButton(labelOf(controls.setting), controls.setting)
+      );
+    }
+
+    if (controls.reshuffle) {
+      panel.append(
+        createActionButton(labelOf(controls.reshuffle), controls.reshuffle)
+      );
+    }
+
+    /* Ссылки на настоящие кнопки: если React их пересоздаст, панель
+       перестроится при следующем проходе. */
+    panel.yfmSetting = controls.setting;
+    panel.yfmReshuffle = controls.reshuffle;
+
+    wheel.append(panel);
+  }
+
+  function cleanVibeWheel() {
+    const wheel = document.querySelector(WHEEL_SELECTOR);
+
+    if (!wheel) {
+      document.documentElement.classList.remove("yfm-wave");
+      return;
+    }
+
+    const controls = findWheelControls(wheel);
+
+    if (!controls.setting && !controls.reshuffle) {
+      document.documentElement.classList.remove("yfm-wave");
+      return;
+    }
+
+    document.documentElement.classList.add("yfm-wave");
+    disableWheelHijack(wheel);
+    renderWheelActions(wheel, controls);
   }
 
   /* ---------------- Запуск ---------------- */

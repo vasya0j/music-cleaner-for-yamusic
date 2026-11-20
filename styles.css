@@ -10,53 +10,67 @@ li:has(> a[data-test-id="NAVBAR_NAVIGATION_ITEM_PLUS"]),
   display: none !important;
 }
 
-/* ---------- 2. Моя волна: оставляем только две кнопки ---------- */
-/* Все карточки колеса, кроме «Настроить Мою волну» и «Назад к привычному /
-   Встряхнуть Мою волну», скрываются. */
-html.yfm-wave [data-test-id="WHEEL_DESKTOP_SLIDE"]:not(:has([data-test-id="WHEEL_SETTING_ITEM"])):not(:has([data-test-id="WHEEL_RESHUFFLE_ITEM"])),
-html.yfm-wave [data-test-id="WHEEL_MOBILE_SLIDE"]:not(:has([data-test-id="WHEEL_SETTING_ITEM"])):not(:has([data-test-id="WHEEL_RESHUFFLE_ITEM"])),
-.yfm-wheel-hide {
-  display: none !important;
+/* ---------- 2. Моя волна: вместо колеса — две кнопки ---------- */
+/* ВАЖНО: саму разметку Swiper не перестраиваем. Колесо — это вертикальный
+   слайдер внутри панели, у которой фиксированная высота. Любые изменения
+   размеров/transform/display у колеса и его родителей ломают раскладку всей
+   страницы (контент «съезжает» вверх). Поэтому прячем только содержимое
+   колеса и рисуем поверх него свою панель с двумя кнопками. */
+html.yfm-wave [data-test-id="WHEEL_DESKTOP"] .swiper-wrapper,
+html.yfm-wave [data-test-id="WHEEL_DESKTOP"] .swiper-notification,
+html.yfm-wave [data-test-id="WHEEL_MOBILE"] .swiper-wrapper,
+html.yfm-wave [data-test-id="WHEEL_MOBILE"] .swiper-notification {
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
-/* Дубли карточек (Swiper создаёт копии для бесконечной прокрутки). */
-.yfm-wheel-hidden {
-  display: none !important;
+/* Панель с двумя кнопками «Моей волны». */
+html.yfm-wave [data-test-id="WHEEL_DESKTOP"],
+html.yfm-wave [data-test-id="WHEEL_MOBILE"] {
+  /* Только создаём контекст для абсолютной панели; размеры не меняются. */
+  position: relative !important;
 }
 
-/* Перестраиваем колесо в компактный блок с двумя кнопками. */
-.yfm-wheel-cleaned {
-  height: auto !important;
-  min-height: 0 !important;
-  overflow: visible !important;
+.yfm-wave-actions {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
-.yfm-wheel-cleaned .swiper-wrapper {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  gap: 12px !important;
-  width: auto !important;
-  height: auto !important;
-  transform: none !important;
-  transition: none !important;
+.yfm-wave-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 220px;
+  padding: 13px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.yfm-wheel-cleaned .yfm-wheel-keep {
-  display: block !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
-  height: auto !important;
-  margin: 0 !important;
-  opacity: 1 !important;
-  transform: none !important;
-  transition: none !important;
+.yfm-wave-actions button:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.28);
 }
 
-.yfm-wheel-parent {
-  height: auto !important;
-  min-height: 0 !important;
+.yfm-wave-actions button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }
 
 /* ---------- 3. «Для вас» и «Тренды»: только «Настроили для вас» ---------- */
@@ -66,17 +80,9 @@ html.yfm-feed [role="tabpanel"] [data-index]:has(section[data-test-id]:not([data
   display: none !important;
 }
 
-/* Схлопываем пустое место от скрытых виртуализированных блоков. */
-html.yfm-feed [role="tabpanel"] > div {
-  height: auto !important;
-  min-height: 0 !important;
-}
-
-html.yfm-feed [role="tabpanel"] > div > [data-index] {
-  position: static !important;
-  height: auto !important;
-  transform: none !important;
-}
+/* Не переводим виртуализированные блоки в position: static и не сбрасываем
+   их transform: список может быть абсолютно позиционированным, и такие
+   правки накладывают блоки друг на друга, ломая клики. */
 
 /* ---------- 4. Ссылка на историю треков ---------- */
 .yfm-history-link {
