@@ -76,9 +76,15 @@ html.yfm-wave [data-test-id="WHEEL_MOBILE"] {
 }
 
 /* ---------- 3. «Для вас» и «Тренды»: только «Настроили для вас» ---------- */
-/* Класс скрытия — отдельным правилом, без :has(). */
-.yfm-block-hidden,
-html.yfm-feed [role="tabpanel"] section[data-test-id]:not([data-test-id="PERSONAL_PLAYLISTS"]) {
+/* Прячем лишние секции ещё до отрисовки, иначе виртуализированный список
+   при прокрутке успевает показать блок и только потом скрыть его — отсюда
+   мигание и лаги. Рекламные секции исключены. */
+html.yfm-feed [role="tabpanel"] section[data-test-id]:not([data-test-id="PERSONAL_PLAYLISTS"]):not([data-test-id^="SPECIAL"]):not([data-test-id^="ADVERT"]):not([data-test-id^="ADVERTISING"]):not([data-test-id^="AD_"]):not([data-test-id^="ADS"]) {
+  display: none !important;
+}
+
+/* Дополнительное скрытие через класс (для блоков вне tabpanel и обёрток). */
+.yfm-block-hidden {
   display: none !important;
 }
 

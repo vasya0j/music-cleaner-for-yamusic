@@ -34,7 +34,7 @@
   /* Видимый маркер для диагностики: в DevTools можно проверить,
      что content script действительно загрузился. */
   if (document.documentElement) {
-    document.documentElement.dataset.yfmCleaner = "1.0.4";
+    document.documentElement.dataset.yfmCleaner = "1.0.6";
   }
 
   /* ---------------- Боковое меню ---------------- */
@@ -98,6 +98,28 @@
     );
   }
 
+  function isAdBlock(element) {
+    const id = element.getAttribute("data-test-id") || "";
+
+    return (
+      /^(SPECIAL|ADVERT|ADVERTISING|AD_|ADS?_)/i.test(id) ||
+      Boolean(
+        element.querySelector(
+          '[data-test-id="SPECIAL_ADV_DISCLAIMER_TRIGGER_BUTTON"]'
+        )
+      )
+    );
+  }
+
+  function showFeedBlock(element) {
+    element.classList.remove("yfm-block-hidden");
+
+    const wrapper = element.closest("[data-index]");
+    if (wrapper) {
+      wrapper.classList.remove("yfm-block-hidden");
+    }
+  }
+
   function hideFeedBlock(element) {
     addClass(element, "yfm-block-hidden");
 
@@ -151,16 +173,12 @@
     document.documentElement.classList.add("yfm-feed");
 
     if (panel) {
-      /* Все блоки-секции, кроме «Настроили для вас». */
+      /* Оставляем «Настроили для вас» и рекламные блоки Яндекса. */
       $all("section[data-test-id]", panel).forEach((section) => {
         const id = section.getAttribute("data-test-id");
 
-        if (id === "PERSONAL_PLAYLISTS") {
-          section.classList.remove("yfm-block-hidden");
-          const index = section.closest("[data-index]");
-          if (index) {
-            index.classList.remove("yfm-block-hidden");
-          }
+        if (id === "PERSONAL_PLAYLISTS" || isAdBlock(section)) {
+          showFeedBlock(section);
           return;
         }
 
