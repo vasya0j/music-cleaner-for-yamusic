@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Яндекс Музыка — только музыка",
+  "version": "1.0.0",
+  "description": "Убирает из Яндекс Музыки лишние разделы и оставляет только нужное: Мою волну, плейлисты «Настроили для вас» и историю треков.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://music.yandex.ru/*",
+        "https://music.yandex.com/*",
+        "https://music.yandex.by/*",
+        "https://music.yandex.kz/*",
+        "https://music.yandex.uz/*"
+      ],
+      "css": ["styles.css"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+/* ============================================================
+   Яндекс Музыка — только музыка
+   ============================================================ */
+
+/* ---------- 1. Лишние разделы в боковом меню ---------- */
+li:has(> a[data-test-id="NAVBAR_NAVIGATION_ITEM_CONCERTS"]),
+li:has(> a[data-test-id="NAVBAR_NAVIGATION_ITEM_NON_MUSIC"]),
+li:has(> a[data-test-id="NAVBAR_NAVIGATION_ITEM_PLUS"]),
+.yfm-nav-hidden {
+  display: none !important;
+}
+
+/* ---------- 2. Моя волна: оставляем только две кнопки ---------- */
+/* Все карточки колеса, кроме «Настроить Мою волну» и «Назад к привычному /
+   Встряхнуть Мою волну», скрываются. */
+html.yfm-wave [data-test-id="WHEEL_DESKTOP_SLIDE"]:not(:has([data-test-id="WHEEL_SETTING_ITEM"])):not(:has([data-test-id="WHEEL_RESHUFFLE_ITEM"])),
+html.yfm-wave [data-test-id="WHEEL_MOBILE_SLIDE"]:not(:has([data-test-id="WHEEL_SETTING_ITEM"])):not(:has([data-test-id="WHEEL_RESHUFFLE_ITEM"])),
+.yfm-wheel-hide {
+  display: none !important;
+}
+
+/* Дубли карточек (Swiper создаёт копии для бесконечной прокрутки). */
+.yfm-wheel-hidden {
+  display: none !important;
+}
+
+/* Перестраиваем колесо в компактный блок с двумя кнопками. */
+.yfm-wheel-cleaned {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.yfm-wheel-cleaned .swiper-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.yfm-wheel-cleaned .yfm-wheel-keep {
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.yfm-wheel-parent {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* ---------- 3. «Для вас» и «Тренды»: только «Настроили для вас» ---------- */
+html.yfm-feed [role="tabpanel"] section[data-test-id]:not([data-test-id="PERSONAL_PLAYLISTS"]),
+html.yfm-feed [role="tabpanel"] [data-index]:has(section[data-test-id]:not([data-test-id="PERSONAL_PLAYLISTS"])):not(:has(section[data-test-id="PERSONAL_PLAYLISTS"])),
+.yfm-block-hidden {
+  display: none !important;
+}
+
+/* Схлопываем пустое место от скрытых виртуализированных блоков. */
+html.yfm-feed [role="tabpanel"] > div {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+html.yfm-feed [role="tabpanel"] > div > [data-index] {
+  position: static !important;
+  height: auto !important;
+  transform: none !important;
+}
+
+/* ---------- 4. Ссылка на историю треков ---------- */
+.yfm-history-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: 10px 0 18px;
+  padding: 9px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit !important;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none !important;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.yfm-history-link::before {
+  content: "↺";
+  font-size: 17px;
+  line-height: 1;
+}
+
+.yfm-history-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+@media (prefers-color-scheme: light) {
+  .yfm-history-link {
+    border-color: rgba(0, 0, 0, 0.12);
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .yfm-history-link:hover {
+    background: rgba(0, 0, 0, 0.11);
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+}
