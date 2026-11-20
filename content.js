@@ -28,6 +28,13 @@
     }
   };
 
+  const normalizeText = (text) =>
+    (text || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+  /* Видимый маркер для диагностики: в DevTools можно проверить,
+     что content script действительно загрузился. */
+  document.documentElement.dataset.yfmCleaner = "1.0.3";
+
   /* ---------------- Боковое меню ---------------- */
 
   function hideExtraNavigation() {
@@ -151,9 +158,6 @@
   }
 
   /* ---------------- «Моя волна» ---------------- */
-
-  const normalizeText = (text) =>
-    (text || "").replace(/\s+/g, " ").trim().toLowerCase();
 
   const isBackToUsual = (element) =>
     normalizeText(element?.textContent).includes("назад к привычному");
@@ -287,11 +291,20 @@
 
   /* ---------------- Запуск ---------------- */
 
+  /* Ошибка в одном шаге не должна отключать все остальные. */
+  function runStep(step) {
+    try {
+      step();
+    } catch (error) {
+      console.warn("[YM Cleaner]", error);
+    }
+  }
+
   function processPage() {
-    hideExtraNavigation();
-    hideMobileAppPromo();
-    cleanFeed();
-    cleanVibeWheel();
+    runStep(hideExtraNavigation);
+    runStep(hideMobileAppPromo);
+    runStep(cleanFeed);
+    runStep(cleanVibeWheel);
   }
 
   function scheduleProcess() {

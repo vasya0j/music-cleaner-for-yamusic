@@ -3,9 +3,12 @@
    ============================================================ */
 
 /* ---------- 1. Лишние разделы в боковом меню ---------- */
-li:has(> a[data-test-id="NAVBAR_NAVIGATION_ITEM_CONCERTS"]),
-li:has(> a[data-test-id="NAVBAR_NAVIGATION_ITEM_NON_MUSIC"]),
-li:has(> a[data-test-id="NAVBAR_NAVIGATION_ITEM_PLUS"]),
+a[data-test-id="NAVBAR_NAVIGATION_ITEM_CONCERTS"],
+a[data-test-id="NAVBAR_NAVIGATION_ITEM_NON_MUSIC"],
+a[data-test-id="NAVBAR_NAVIGATION_ITEM_PLUS"],
+li:has(a[data-test-id="NAVBAR_NAVIGATION_ITEM_CONCERTS"]),
+li:has(a[data-test-id="NAVBAR_NAVIGATION_ITEM_NON_MUSIC"]),
+li:has(a[data-test-id="NAVBAR_NAVIGATION_ITEM_PLUS"]),
 .yfm-nav-hidden {
   display: none !important;
 }
