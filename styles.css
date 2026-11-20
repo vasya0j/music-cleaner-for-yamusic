@@ -3,13 +3,12 @@
    ============================================================ */
 
 /* ---------- 1. Лишние разделы в боковом меню ---------- */
+/* Отдельные правила без :has(), чтобы неподдерживаемый селектор не
+   обнулял весь список и не «возвращал» разделы на старых движках. */
+.yfm-nav-hidden,
 a[data-test-id="NAVBAR_NAVIGATION_ITEM_CONCERTS"],
 a[data-test-id="NAVBAR_NAVIGATION_ITEM_NON_MUSIC"],
-a[data-test-id="NAVBAR_NAVIGATION_ITEM_PLUS"],
-li:has(a[data-test-id="NAVBAR_NAVIGATION_ITEM_CONCERTS"]),
-li:has(a[data-test-id="NAVBAR_NAVIGATION_ITEM_NON_MUSIC"]),
-li:has(a[data-test-id="NAVBAR_NAVIGATION_ITEM_PLUS"]),
-.yfm-nav-hidden {
+a[data-test-id="NAVBAR_NAVIGATION_ITEM_PLUS"] {
   display: none !important;
 }
 
@@ -77,9 +76,9 @@ html.yfm-wave [data-test-id="WHEEL_MOBILE"] {
 }
 
 /* ---------- 3. «Для вас» и «Тренды»: только «Настроили для вас» ---------- */
-html.yfm-feed [role="tabpanel"] section[data-test-id]:not([data-test-id="PERSONAL_PLAYLISTS"]),
-html.yfm-feed [role="tabpanel"] [data-index]:has(section[data-test-id]:not([data-test-id="PERSONAL_PLAYLISTS"])):not(:has(section[data-test-id="PERSONAL_PLAYLISTS"])),
-.yfm-block-hidden {
+/* Класс скрытия — отдельным правилом, без :has(). */
+.yfm-block-hidden,
+html.yfm-feed [role="tabpanel"] section[data-test-id]:not([data-test-id="PERSONAL_PLAYLISTS"]) {
   display: none !important;
 }
 
@@ -132,7 +131,10 @@ html.yfm-feed [role="tabpanel"] [data-index]:has(section[data-test-id]:not([data
 /* «Слушать в приложении» и «Скачать в Google Play / App Store».
    Классы CSS-модулей содержат хеш, поэтому цепляемся за стабильный префикс.
    Блок абсолютно спозиционирован над плеером, поэтому просто прячем его. */
-div[class*="DeeplinkAndOnelinkContainer_root"],
 .yfm-app-promo-hidden {
+  display: none !important;
+}
+
+div[class*="DeeplinkAndOnelinkContainer_root"] {
   display: none !important;
 }

@@ -33,7 +33,9 @@
 
   /* Видимый маркер для диагностики: в DevTools можно проверить,
      что content script действительно загрузился. */
-  document.documentElement.dataset.yfmCleaner = "1.0.3";
+  if (document.documentElement) {
+    document.documentElement.dataset.yfmCleaner = "1.0.4";
+  }
 
   /* ---------------- Боковое меню ---------------- */
 
@@ -54,7 +56,22 @@
   ];
 
   function hideMobileAppPromo() {
-    $all('button[role="link"]').forEach((button) => {
+    /* Основной путь: блок с кнопками легко найти по префиксу класса. */
+    $all('[class*="DeeplinkAndOnelinkContainer_root"]').forEach((block) => {
+      addClass(block, "yfm-app-promo-hidden");
+    });
+
+    /* Запасной путь: ищем кнопки только рядом с мобильным плеером,
+       чтобы не перебирать все кнопки страницы на каждом проходе. */
+    const playerBar = document.querySelector(
+      '[data-test-id="MOBILE_PLAYERBAR"]'
+    );
+
+    if (!playerBar || !playerBar.parentElement) {
+      return;
+    }
+
+    $all('button[role="link"]', playerBar.parentElement).forEach((button) => {
       const text = normalizeText(button.textContent);
       const isPromo = MOBILE_APP_PROMO_TEXTS.some((part) =>
         text.includes(part)
@@ -77,7 +94,7 @@
   function isFeedPage(panel) {
     return Boolean(
       document.querySelector('[data-test-id="LANDING_PAGE"]') ||
-      panel?.querySelector('[data-test-id="PERSONAL_PLAYLISTS"]')
+      (panel && panel.querySelector('[data-test-id="PERSONAL_PLAYLISTS"]'))
     );
   }
 
@@ -99,10 +116,13 @@
       return;
     }
 
+    const landingHeader = landing.querySelector(
+      '[data-test-id="LANDING_PAGE_HEADER"]'
+    );
     const header =
       landing.querySelector('[data-test-id="COMPOSITE_HEADER_CONTAINER"]') ||
       landing.querySelector(".LandingPage_header__TiraG") ||
-      landing.querySelector('[data-test-id="LANDING_PAGE_HEADER"]')?.parentElement;
+      (landingHeader ? landingHeader.parentElement : null);
 
     if (!header) {
       return;
@@ -120,7 +140,7 @@
   function cleanFeed() {
     const landing = document.querySelector('[data-test-id="LANDING_PAGE"]');
     const panel =
-      landing?.querySelector('[role="tabpanel"]') ||
+      (landing && landing.querySelector('[role="tabpanel"]')) ||
       document.querySelector('[role="tabpanel"]');
 
     if (!isFeedPage(panel)) {
@@ -137,9 +157,10 @@
 
         if (id === "PERSONAL_PLAYLISTS") {
           section.classList.remove("yfm-block-hidden");
-          section
-            .closest("[data-index]")
-            ?.classList.remove("yfm-block-hidden");
+          const index = section.closest("[data-index]");
+          if (index) {
+            index.classList.remove("yfm-block-hidden");
+          }
           return;
         }
 
@@ -160,7 +181,9 @@
   /* ---------------- «Моя волна» ---------------- */
 
   const isBackToUsual = (element) =>
-    normalizeText(element?.textContent).includes("назад к привычному");
+    normalizeText(element && element.textContent).includes(
+      "назад к привычному"
+    );
 
   const WHEEL_SELECTOR =
     '[data-test-id="WHEEL_DESKTOP"], [data-test-id="WHEEL_MOBILE"]';
@@ -191,7 +214,11 @@
   function disableWheelHijack(wheel) {
     /* Если у Swiper есть доступный экземпляр, выключаем модуль mousewheel. */
     const instance = wheel.swiper || wheel.__swiper__;
-    instance?.mousewheel?.disable?.();
+    if (instance && instance.mousewheel) {
+      if (typeof instance.mousewheel.disable === "function") {
+        instance.mousewheel.disable();
+      }
+    }
 
     if (wheel.dataset.yfmWheelGuard) {
       return;
@@ -243,20 +270,22 @@
       return;
     }
 
-    panel?.remove();
+    if (panel) {
+      panel.remove();
+    }
 
     panel = document.createElement("div");
     panel.className = "yfm-wave-actions";
     panel.setAttribute("data-yfm-injected", "1");
 
     if (controls.setting) {
-      panel.append(
+      panel.appendChild(
         createActionButton(labelOf(controls.setting), controls.setting)
       );
     }
 
     if (controls.reshuffle) {
-      panel.append(
+      panel.appendChild(
         createActionButton(labelOf(controls.reshuffle), controls.reshuffle)
       );
     }
@@ -266,7 +295,7 @@
     panel.yfmSetting = controls.setting;
     panel.yfmReshuffle = controls.reshuffle;
 
-    wheel.append(panel);
+    wheel.appendChild(panel);
   }
 
   function cleanVibeWheel() {
