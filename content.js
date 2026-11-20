@@ -38,6 +38,33 @@
     });
   }
 
+  /* ---------------- Мобильное промо приложения ---------------- */
+
+  const MOBILE_APP_PROMO_TEXTS = [
+    "слушать в приложении",
+    "скачать в google play",
+    "скачать в app store"
+  ];
+
+  function hideMobileAppPromo() {
+    $all('button[role="link"]').forEach((button) => {
+      const text = normalizeText(button.textContent);
+      const isPromo = MOBILE_APP_PROMO_TEXTS.some((part) =>
+        text.includes(part)
+      );
+
+      if (!isPromo) {
+        return;
+      }
+
+      const block =
+        button.closest('[class*="DeeplinkAndOnelinkContainer_root"]') ||
+        button.parentElement;
+
+      addClass(block || button, "yfm-app-promo-hidden");
+    });
+  }
+
   /* ---------------- «Для вас» и «Тренды» ---------------- */
 
   function isFeedPage(panel) {
@@ -262,6 +289,7 @@
 
   function processPage() {
     hideExtraNavigation();
+    hideMobileAppPromo();
     cleanFeed();
     cleanVibeWheel();
   }

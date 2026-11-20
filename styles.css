@@ -84,8 +84,7 @@ html.yfm-feed [role="tabpanel"] [data-index]:has(section[data-test-id]:not([data
    их transform: список может быть абсолютно позиционированным, и такие
    правки накладывают блоки друг на друга, ломая клики. */
 
-/* ---------- 4. Ссылка на историю треков ---------- */
-.yfm-history-link {
+/* ---------- 4. Ссылка на историю треков ---------- */.yfm-history-link {
   display: inline-flex !important;
   align-items: center;
   gap: 8px;
@@ -124,4 +123,13 @@ html.yfm-feed [role="tabpanel"] [data-index]:has(section[data-test-id]:not([data
     background: rgba(0, 0, 0, 0.11);
     border-color: rgba(0, 0, 0, 0.2);
   }
+}
+
+/* ---------- 5. Мобильный промо-блок приложения ---------- */
+/* «Слушать в приложении» и «Скачать в Google Play / App Store».
+   Классы CSS-модулей содержат хеш, поэтому цепляемся за стабильный префикс.
+   Блок абсолютно спозиционирован над плеером, поэтому просто прячем его. */
+div[class*="DeeplinkAndOnelinkContainer_root"],
+.yfm-app-promo-hidden {
+  display: none !important;
 }

@@ -30,6 +30,10 @@
 - Убирает «Концерты для вас», «Премьеру», донаты, «Исследуйте жанр» и остальные блоки.
 - Добавляет ссылку **«История треков»** на `https://music.yandex.ru/music-history`.
 
+**Мобильная версия**
+- Убирает блок «Слушать в приложении» / «Скачать в Google Play» (или App Store)
+  над мобильным плеером.
+
 ## Установка
 
 1. Скачайте или скопируйте папку `yandex-music-cleaner` на компьютер.
@@ -67,7 +71,8 @@ yandex-music-cleaner/
 - `NAVBAR_NAVIGATION_ITEM_PLUS`
 - `WHEEL_*_SLIDE`, `WHEEL_SETTING_ITEM`, `WHEEL_RESHUFFLE_ITEM` — колесо «Моей волны»;
 - `PERSONAL_PLAYLISTS` — плейлисты «Настроили для вас»;
-- `CONCERTS_PERSONAL`, `SMART_OPEN_PLAYLIST`, `DONATIONS`, `RECOMMENDED_PLAYLISTS` — лишние блоки на странице «Для вас и Тренды».
+- `CONCERTS_PERSONAL`, `SMART_OPEN_PLAYLIST`, `DONATIONS`, `RECOMMENDED_PLAYLISTS` — лишние блоки на странице «Для вас и Тренды»;
+- `DeeplinkAndOnelinkContainer_root` — мобильный промо-блок приложения.
 
 Так как Яндекс Музыка — одностраничное приложение, расширение следит за
 изменениями DOM через `MutationObserver` и повторно применяет очистку после
